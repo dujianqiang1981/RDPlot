@@ -8,8 +8,8 @@ from PyQt5 import QtWidgets, QtGui
 from PyQt5.QtCore import QItemSelectionModel
 from PyQt5.uic import loadUiType
 
-
-from rdplot.SimulationDataItem import dict_tree_from_sim_data_items
+from rdplot.Widgets.CurveWindow import CurveWindow
+from rdplot.SimulationDataItem import dict_tree_from_sim_data_items, PlotData
 from rdplot.Widgets.PlotWidget import PlotWidget
 from rdplot.model import SimDataItemTreeModel, OrderedDictModel, VariableTreeModel, BdTableModel
 from rdplot.view import QRecursiveSelectionModel
@@ -118,6 +118,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.combo_rate_psnr.addItems(["drate", "dsnr"])
         self.combo_interp.currentIndexChanged.connect(self.on_combo_box)
         self.combo_rate_psnr.currentIndexChanged.connect(self.on_combo_box)
+
+        # set up button to generate new curve
+        self.pushButton_newcurve.clicked.connect(self.generate_new_curve)
+
+        self.curve_window = CurveWindow()
 
     # sets Visibility for the Plotsettings Widget
     def set_plot_settings_visibility(self):
@@ -455,7 +460,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             column_saver = column_saver + column_count
             config_count += 1
 
-            if config_count == len(config):
+            plot_data_collection = plot_data_collection[1:]
+            if plot_data.identifiers[0] not in list(map(lambda x: x.identifiers[0], plot_data_collection)):
                 plot_count += 1
                 column_saver = config_count = 0
             data_count += 1
@@ -467,6 +473,47 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # anchor
         self.bdTableModel.update_table(self.combo_rate_psnr.currentText(),
                                        self.combo_interp.currentText(), index)
+
+    def generate_new_curve(self):
+
+        plot_data_collection = self.get_plot_data_collection_from_selected_variables()
+        #plot_data = self.fuse_plot_data_collection(plot_data_collection)
+
+        try: plot_data = self.fuse_plot_data_collection(plot_data_collection)
+        except ValueError:
+            return QtWidgets.QMessageBox.warning(self, "Warning!", "You didn't select at least 4 points.")
+
+        if(len(plot_data.values) < 4):
+                QtWidgets.QMessageBox.warning(self, "Warning!", "You didn't select at least 4 points.")
+
+        else:
+            curve_name, ok = QtWidgets.QInputDialog.getText(self, "New curve", "Please enter name of new curve. "
+                                        "If you enter a name that is already existing, its data will be overwritten.")
+            # curvelistview , thread needs to start here
+            self.curve_window.show()
+            self.curve_window.activateWindow()
+            self.curve_window.curveListView.curveThread.add_items(curve_name, plot_data)
+            self.curve_window.curveListView.curveThread.start()
+            #self.curve_window.update(curve_name, plot_data)
+
+
+
+
+
+    def fuse_plot_data_collection(self, plot_data_collection):
+
+        if plot_data_collection:
+            fused = plot_data_collection[0]
+
+            for plot_data in plot_data_collection[1:]:
+                fused.identifiers.extend(plot_data.identifiers)
+                fused.values.extend(plot_data.values)
+                fused.path.extend(plot_data.path)
+                # todo label
+            return fused
+
+        else: raise ValueError
+
 
     def export_table_to_csv(self):
         # remember that the decimal mark is '.'

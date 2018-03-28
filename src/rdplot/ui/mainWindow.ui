@@ -20,8 +20,8 @@
      <verstretch>0</verstretch>
     </sizepolicy>
    </property>
-   <layout class="QGridLayout" name="gridLayout" rowstretch="0" columnstretch="0">
-    <item row="0" column="0">
+   <layout class="QGridLayout" name="gridLayout" rowstretch="0,0" columnstretch="0">
+    <item row="1" column="0">
      <widget class="QTabWidget" name="tabWidget">
       <property name="focusPolicy">
        <enum>Qt::TabFocus</enum>
@@ -194,6 +194,25 @@ padding: 4px;
       </widget>
      </widget>
     </item>
+    <item row="0" column="0">
+     <widget class="QPushButton" name="pushButton_newcurve">
+      <property name="toolTip">
+       <string notr="true" extracomment="Choose at least four points and plotsettings to generate curve">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Choose at least 4 points and the plotsettings, then generate new curve&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      </property>
+      <property name="toolTipDuration">
+       <number>0</number>
+      </property>
+      <property name="statusTip">
+       <string extracomment="Choose at least four points and plotsettings to generate curve"/>
+      </property>
+      <property name="whatsThis">
+       <string extracomment="Choose at least four points and plotsettings to generate curve"/>
+      </property>
+      <property name="text">
+       <string>Generate new curve</string>
+      </property>
+     </widget>
+    </item>
    </layout>
   </widget>
   <widget class="QDockWidget" name="plotsettings">
@@ -258,7 +277,7 @@ padding: 4px;
      <x>0</x>
      <y>0</y>
      <width>1253</width>
-     <height>22</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -440,7 +459,7 @@ padding: 4px;
   </action>
   <action name="action_About">
    <property name="text">
-    <string>About</string>
+    <string>&amp;About</string>
    </property>
   </action>
  </widget>

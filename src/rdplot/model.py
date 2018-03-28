@@ -23,7 +23,7 @@ import numpy as np
 from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtWidgets import QPushButton
 from PyQt5.Qt import Qt, QVariant, QModelIndex, QDialog, QHBoxLayout, QVBoxLayout, QAbstractItemView
-from PyQt5.QtCore import QAbstractListModel, QAbstractItemModel, QAbstractTableModel, pyqtSignal
+from PyQt5.QtCore import QAbstractListModel, QAbstractItemModel, QAbstractTableModel, pyqtSignal, QStringListModel
 from rdplot.SimulationDataItemClasses.EncoderLogs import AbstractEncLog
 from rdplot.lib.BD import bjontegaard
 from string import Template
@@ -1122,3 +1122,6 @@ class BdTableModel(QAbstractTableModel):
             latex_template = LatexTemplate(template_file.read())
             new_latex_doc = latex_template.substitute(table_goeth_here=latex_table)
             output_file.write(new_latex_doc)
+
+
+

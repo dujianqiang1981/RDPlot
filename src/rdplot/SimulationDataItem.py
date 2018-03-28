@@ -26,7 +26,6 @@ from os import listdir
 from collections import deque
 from copy import copy
 
-
 #
 # Functions
 #
@@ -256,13 +255,12 @@ class AbstractSimulationDataItem(metaclass=ABCMeta):
 
     @abstractproperty
     def tree_identifier_list(self):
-        """Property to acces a list of identifiers, used to specify the position
+        """Property to access a list of identifiers, used to specify the position
         of simulation data items in the tree view.
 
         :rtype: :class: `list` of :class: `str`
         """
         pass
-
 
     # Magic Methods
     # TODO remove if usefull 'set' is implemented
@@ -285,7 +283,6 @@ class AbstractSimulationDataItem(metaclass=ABCMeta):
             text = simulation_data_item_file.read()
             return bool( re.search(pattern, text, re.M + re.X) )
         raise SimulationDataItemError( "Could not open file {}".format(path) )
-
 
 
 class SimulationDataItemFactory:
@@ -387,9 +384,9 @@ class SimulationDataItemFactory:
         cls_list = []
         # try parser, in the order given by their parse_order attribute. use the first one that can parse the file
         for cls in reversed(sorted(self._classes, key=lambda parser_class: parser_class.parse_order)):
-            if cls.can_parse_file(file_path):
-                cls_list.append(cls(file_path))
-                break
+                if cls.can_parse_file(file_path):
+                    cls_list.append(cls(file_path))
+                    break
         return cls_list
 
         raise SimulationDataItemError((
@@ -397,6 +394,7 @@ class SimulationDataItemFactory:
             " the sub classes of *AbstractSimulationDataItem* known to the"
             " SimulationDataItemFactory."
         ).format(file_path))
+
 
     def create_item_list_from_directory(self, directory_path):
         """Try to create simulation data items for all files in a directory at
@@ -436,11 +434,13 @@ class SimulationDataItemFactory:
 
         if isfile(path):
             return self.create_item_from_file(path)
-        if isdir(path):
+        elif isdir(path): # todo: war vorher if, macht das probleme mit elif?
             item_list = self.create_item_list_from_directory(path)
             if len(item_list) == 0:
                 raise SimulationDataItemError()
             return item_list
+        #elif isinstance(path, str): #if path is just a curve name of a newly generated RD curve
+        #    return self.create_item_from_other_items(path)
 
         raise SimulationDataItemError((
             "Not at least one simulation data item can be created from path"

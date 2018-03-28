@@ -74,7 +74,7 @@ class PlotWidget(QWidget, Ui_PlotWidget):
         self.verticalLayout_3.addWidget(self.toolbar)
 
     # refreshes the figure according to new changes done
-    def change_plot(self, plot_data_collection):
+    def change_plot(self, plot_data_collection, legend_keys = []):
         """Plot all data from the *plot_data_collection*
 
         :param plot_data_collection: A iterable collection of :clas: `PlotData`
@@ -106,20 +106,25 @@ class PlotWidget(QWidget, Ui_PlotWidget):
 
         # Now lets create a legend only containing informative
         # content (no duplicates)
-        tmp_legend = []
-        for plot_data in plot_data_collection:
-            tmp = []
-            for identifiers in plot_data.identifiers:
-                tmp += identifiers.split(sep)
-            tmp2 = tmp + plot_data.path
-            tmp_legend.append(tmp2)
 
-        legend = []
-        for c in tmp_legend:
-            result = list(filter(lambda x: all(x in l for l in tmp_legend) == False, c))
-            legend.append(" ".join(result))
-        if len(tmp_legend) == 1:
-            legend = ['']
+        if legend_keys:
+            #legend = []
+            legend = legend_keys
+        else:
+            tmp_legend = []
+            for plot_data in plot_data_collection:
+                tmp = []
+                for identifiers in plot_data.identifiers:
+                    tmp += identifiers.split(sep)
+                tmp2 = tmp + plot_data.path
+                tmp_legend.append(tmp2)
+
+            legend = []
+            for c in tmp_legend:
+                result = list(filter(lambda x: all(x in l for l in tmp_legend) == False, c))
+                legend.append(" ".join(result))
+            if len(tmp_legend) == 1:
+                legend = ['']
 
         # plot all the lines which are missing yet
         plot_count = 0

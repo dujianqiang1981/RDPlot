@@ -33,9 +33,9 @@ from os.path import isdir
 import jsonpickle
 import json
 
-from rdplot.SimulationDataItem import SimulationDataItemFactory, SimulationDataItemError
+from rdplot.SimulationDataItem import SimulationDataItemFactory, SimulationDataItemError, PlotData
 from rdplot.model import AmbiguousSimDataItems
-
+#from rdplot.Widgets.CurveWindow import CurveWindow
 
 # Path to the folder containing simulation data sub classes. The classes
 # are loaded by the simulation data item factory and used for parsing files
@@ -283,6 +283,7 @@ class SimDataItemTreeView(QtWidgets.QTreeView):
         #self.msg.show()
         #self.parserThread.addPath(path)
         #self.parserThread.start()
+
     def _hide_parse_message(self):
         self.msg.hide()
 
@@ -431,3 +432,59 @@ class QRecursiveSelectionModel(QItemSelectionModel):
                         q_index_parent_queue.append(q_index)
 
         return list(index_ranges)
+
+
+class NewCurveThread(QThread):
+
+    newCurveData = pyqtSignal(str, PlotData)
+    #allDone      = pyqtSignal()
+
+    def __init__(self, plot_data=None, name = ''):
+        QThread.__init__(self)
+
+        # todo was ist meine factory
+        #self._factory = SimulationDataItemFactory.from_path(
+        #    SIMULATION_DATA_ITEM_CLASSES_PATH
+        #)
+
+        if plot_data is None:
+            plot_data = []
+        self.plot_data = plot_data
+
+        self.name = name
+
+
+    def __del__(self):
+        self.wait()
+
+    def add_items(self, curve_name, items):
+        self.plot_data = items
+        self.name = curve_name
+
+    def run(self):
+        self.newCurveData.emit(self.name, self.plot_data)
+        self.plot_data = []
+        self.name = ''
+        return
+
+
+#class NewCurveNoThread(QObject):
+
+class CurveListView(QtWidgets.QListView):
+    def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+
+            #self.setSelectionMode(2)
+            self.curveThread = NewCurveThread()
+            self.curveThread.newCurveData.connect(self._update_model)
+            #self.curveThread.allDone.connect(self.show())
+
+    def _update_model(self, curve_name, plot_data):
+        if not plot_data:
+            msg = QtWidgets.QMessageBox(self)  # use self as parent here
+            msg.setIcon(QtWidgets.QMessageBox.Warning)
+            msg.setText("I cannot find any plot data to create a new curve.")
+            msg.setWindowTitle("Warning")
+            msg.show()
+
+        self.model().update_from_plot_data(curve_name, plot_data)
